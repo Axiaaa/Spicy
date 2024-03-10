@@ -1,6 +1,6 @@
 from interactions import *
 from requests import get
-from random import randint
+import os
 
 FOOTER_TEXT = "La question peut parfois être en anglais ou mal traduite, désolé pour la gêne occasionée !"
 
@@ -140,6 +140,23 @@ async def paranoia(ctx : InteractionContext):
             embed.description = f"{r['question']}\n:warning: Cette question n'a pas pu être traduite.";
         await ctx.send(embed=embed)
 
-bot = Client(token="", intents=Intents.ALL)
+
+from interactions import *
+
+@slash_command(name="info", description="Affiche les informations du bot")
+async def info(ctx : InteractionContext):
+        try : 
+            embed = Embed(title="Informations du bot", color=Color.from_hex("#FF0000"))
+            embed.add_field(name="Développé en", value="Python, avec [interactions.py (v5)](https://github.com/interactions-py/interactions.py)", inline=True)
+            embed.add_field(name="Créé le", value=f"{bot.app.created_at}", inline=False)
+            embed.add_field(name="Créé par", value=f"<@{bot.owner.id}>", inline=False)
+            embed.add_field(name="Serveurs", value=len(bot.guilds), inline=True)
+            embed.add_field(name="Latence", value=f"{round(bot.latency * 100)} ms", inline=True)
+            embed.set_footer(text=bot.app.name, icon_url=bot.user.avatar_url)
+            await ctx.send(embed=embed)
+        except OverflowError : 
+            await ctx.send("La commande est indisponible pour le moment. Réessayes dans quelques minutes.", ephemeral=True)
+
+bot = Client(token=os.environ['STOKEN'], intents=Intents.ALL)
 bot.start()
 
