@@ -18,18 +18,17 @@ async def api_request(str, ctx : InteractionContext):
 async def on_ready(event) -> None :
     print("Je suis pret !")
 
-
 @listen(events.Startup)
 async def on_start(event) -> None:
     print("Je demarre !")
 
-
+#TODO Handle Multiple choices questions
+@cooldown(Buckets.GUILD, 1, 5)
 @slash_command(
     name="verite",
     description="Propose une vérité",
     nsfw=True,
-    dm_permission=False
-    #TODO COOLDOWN
+    dm_permission=False, 
 )
 async def truth(ctx : InteractionContext) :
     r = await api_request("truth", ctx)
@@ -47,15 +46,15 @@ async def truth(ctx : InteractionContext) :
             embed.description = f"{r['question']}\n:warning: Cette question n'a pas pu être traduite.";
         await ctx.send(embed=embed)
 
+@cooldown(Buckets.GUILD, 1, 5)
 @slash_command(
     name="action",
     description="Propose une action",
     nsfw=True,
-    dm_permission=False
-    #TODO COOLDOWN
+    dm_permission=False  
 )
 async def dare(ctx : InteractionContext):
-    r = api_request("dare")
+    r = await api_request("dare", ctx)
     if (r):
         embed = Embed(
             title="Action",
@@ -70,15 +69,16 @@ async def dare(ctx : InteractionContext):
             embed.description = f"{r['question']}\n:warning: Cette question n'a pas pu être traduite.";
         await ctx.send(embed=embed)
 
+@cooldown(Buckets.GUILD, 1, 5)
 @slash_command(
     name="dilemme",
     description="Propose un dilemme sous forme de \"Tu preferes\"",
     nsfw=True,
     dm_permission=False
-    #TODO COOLDOWN
+    
 )
 async def wyr(ctx : InteractionContext):
-    r = api_request("wyr")
+    r = await api_request("wyr", ctx)
     if (r):
         embed = Embed(
             title="Tu péfères ?",
@@ -93,15 +93,15 @@ async def wyr(ctx : InteractionContext):
             embed.description = f"{r['question']}\n:warning: Ce dilemme n'a pas pu être traduit.";
         await ctx.send(embed=embed)
 
+@cooldown(Buckets.GUILD, 1, 5)
 @slash_command(
     name="n_as_tu_jamais",
     description="Propose une sous forme de \"N'as-tu jamais ...\"",
     nsfw=True,
     dm_permission=False
-    #TODO COOLDOWN
 )
 async def nhie(ctx : InteractionContext):
-    r = api_request("nhie")
+    r = await api_request("nhie", ctx)
     if (r):
         embed = Embed(
             title="N'as-tu jamais ?",
@@ -114,18 +114,19 @@ async def nhie(ctx : InteractionContext):
             embed.add_field(name="Anglais", value=r['question'], inline=False)
         else :
             embed.description = f"{r['question']}\n:warning: Cette question n'a pas pu être traduite.";
-        await ctx.send(embed=embed)
+        msg = await ctx.send(embed=embed)
+        await msg.add_reaction(":white_check_mark:")
+        await msg.add_reaction(":x:")
 
-
+@cooldown(Buckets.GUILD, 1, 5)
 @slash_command(
     name="paranoia",
-    description="Pose une question pour te mettre mal à l'aise",
+    description="Pose une question pour mettre mal à l'aise",
     nsfw=True,
     dm_permission=False
-    #TODO COOLDOWN
 )
 async def paranoia(ctx : InteractionContext):
-    r = api_request("paranoia")
+    r = await api_request("paranoia", ctx)
     if (r):
         embed = Embed(
             title="Paranoia",
@@ -141,8 +142,6 @@ async def paranoia(ctx : InteractionContext):
         await ctx.send(embed=embed)
 
 
-from interactions import *
-
 @slash_command(name="info", description="Affiche les informations du bot")
 async def info(ctx : InteractionContext):
         try : 
@@ -156,6 +155,17 @@ async def info(ctx : InteractionContext):
             await ctx.send(embed=embed)
         except OverflowError : 
             await ctx.send("La commande est indisponible pour le moment. Réessayes dans quelques minutes.", ephemeral=True)
+
+@listen(disable_default_listeners=True)
+async def on_command_error(event: errors):
+    if isinstance(event.error, errors.CommandOnCooldown):
+        temps_restant = round(event.error.cooldown.get_cooldown_time())
+        await event.ctx.send(
+            f"La commande est sous cooldown ! Réessayes dans {temps_restant} secondes",
+            ephemeral=True,
+        )
+    else:
+        await bot.on_command_error(bot, event)
 
 bot = Client(token=os.environ['STOKEN'], intents=Intents.ALL)
 bot.start()
