@@ -1,16 +1,6 @@
 from interactions import *
-from requests import get
 from utils import *
 import os
-
-@listen(events.Ready)
-async def on_ready(event) -> None :
-    print("Je suis pret !")
-
-@listen(events.Startup)
-async def on_start(event) -> None:
-    print("Je demarre !")
-
 
 @listen(disable_default_listeners=True)
 async def on_command_error(event: errors):
@@ -30,5 +20,6 @@ bot.load_extension("wyr")
 bot.load_extension("dilemma")
 bot.load_extension("verity")
 bot.load_extension("info")
+bot.load_extension("listen")
 bot.start()
 
