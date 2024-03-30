@@ -1,6 +1,14 @@
 from interactions import *
 from utils import *
-import os
+import os, logging
+
+logging.basicConfig(level=logging.INFO,
+                    format="%(asctime)s %(levelname)s %(message)s",
+                    datefmt="%H:%M:%S",
+                    handlers=[
+                        logging.FileHandler("bot.log"),
+                        logging.StreamHandler()
+                    ])
 
 @listen(disable_default_listeners=True)
 async def on_command_error(event: errors):
@@ -13,13 +21,13 @@ async def on_command_error(event: errors):
     else:
         await bot.on_command_error(bot, event)
 
+def load_extensions(bot, folder, folder_name="", exclude_files=[]):
+    extensions = [file.replace(".py", "") for file in os.listdir(folder) if file.endswith(".py") and file not in exclude_files]
+    for ext in extensions:
+        logging.debug(f"{ext} a été chargé !")
+        bot.load_extension(f"{folder_name}{ext}")
+
 bot = Client(token=os.environ['STOKEN'], intents=Intents.ALL)
-bot.load_extension("dare")
-bot.load_extension("paranoia")
-bot.load_extension("wyr")
-bot.load_extension("dilemma")
-bot.load_extension("verity")
-bot.load_extension("info")
-bot.load_extension("listen")
+load_extensions(bot, "exts", "exts.")
 bot.start()
 

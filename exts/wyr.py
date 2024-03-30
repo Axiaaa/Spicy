@@ -1,5 +1,5 @@
 from interactions import *
-from utils import *
+from utils import api_request, FOOTER_TEXT
 
 class WouldYouRather(Extension):
         
