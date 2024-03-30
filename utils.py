@@ -9,6 +9,6 @@ async def api_request(str, ctx : InteractionContext):
         if r.status_code == 200:
             return r.json()
         else :
-            await ctx.send(f"Erreur avec la requete API", ephemeral=True)
+            await ctx.send(f"Erreur avec la requete API. ``Code : {r.status_code}", ephemeral=True)
     except Exception as e:
         await ctx.send(f"Erreur ! {e}", ephemeral=True)
